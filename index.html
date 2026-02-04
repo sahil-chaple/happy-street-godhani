@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Street Godhani - First Time Ever! 🎡</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Inline&family=Fredoka:wght@400;600;700&family=Gochi+Hand&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Add Font Awesome for loading spinner -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --sky-blue: #0ea5e9;
+            --sunny-yellow: #facc15;
+            --mint: #6ee7b7;
+            --coral: #fb7185;
+            --street-gray: #334155;
+        }
+        
+        body {
+            font-family: 'Fredoka', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+            /* Global Texture Background */
+            background-image: url('https://www.transparenttextures.com/patterns/asfalt-light.png');
+            cursor: none; 
+            overflow-x: hidden;
+        }
+
+        .font-hand { font-family: 'Gochi Hand', cursive; }
+        .font-bungee { font-family: 'Bungee Inline', cursive; }
+
+        /* --- IMMERSIVE UI CONCEPTS --- */
+
+        .btn-road-sign {
+            width: 180px; height: 180px;
+            background: var(--sunny-yellow);
+            color: #1e293b;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            box-shadow: 0 12px 0 #ca8a04, 0 25px 40px rgba(0,0,0,0.15);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            border: 8px solid #1e293b;
+            animation: bounce-slow 3s infinite;
+        }
+        .btn-road-sign:hover { transform: scale(1.1) rotate(5deg); background: #fff; }
+
+        @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        #cursor-balloon {
+            position: fixed;
+            width: 25px; height: 32px;
+            background: var(--coral);
+            border-radius: 50% 50% 50% 10%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease-out;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+        }
+        #cursor-balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -20px; left: -2px;
+            width: 1px; height: 25px;
+            background: rgba(0,0,0,0.2);
+            transform: rotate(-45deg);
+        }
+
+        .street-turn-right {
+            clip-path: ellipse(100% 100% at 50% 0%);
+            margin-top: -100px;
+            height: 150px;
+            background: transparent;
+            position: relative;
+            z-index: 10;
+        }
+        .street-turn-left {
+            clip-path: ellipse(100% 100% at 50% 100%);
+            height: 150px;
+            background: transparent;
+            margin-bottom: -100px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .shape-oval { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        .shape-wave { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+        .shape-cloud { border-radius: 50% 50% 50% 50% / 30% 60% 40% 70%; }
+        .shape-splash { border-radius: 80% 20% 50% 50% / 50% 50% 20% 80%; }
+
+        .scrapbook-card {
+            background: #fff;
+            padding: 15px 15px 50px 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.4s ease;
+        }
+        .scrapbook-card::before {
+            content: '';
+            position: absolute;
+            top: -10px; left: 50%; transform: translateX(-50%) rotate(-2deg);
+            width: 80px; height: 30px;
+            background: rgba(255,255,255,0.7);
+            border: 1px solid rgba(0,0,0,0.05);
+            z-index: 5;
+        }
+        .scrapbook-card:hover { transform: scale(1.05) rotate(0deg) !important; z-index: 20; }
+
+        .mela-item {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.15;
+            animation: rise 10s linear infinite;
+        }
+        @keyframes rise {
+            from { transform: translateY(100vh) rotate(0); }
+            to { transform: translateY(-20vh) rotate(360deg); }
+        }
+
+        .reveal { opacity: 0; transform: translateY(50px) rotate(2deg); transition: all 1s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0) rotate(0); }
+
+        .sticky-dock {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 3px solid var(--sky-blue);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+        }
+
+        .doodle-underline {
+            position: relative;
+            z-index: 1;
+        }
+        .doodle-underline::after {
+            content: '';
+            position: absolute;
+            left: -5%; bottom: 0; width: 110%; height: 8px;
+            background: var(--sunny-yellow);
+            z-index: -1;
+            border-radius: 10px;
+            transform: rotate(-1deg);
+        }
+
+        .poster-badge {
+            background: #ef4444;
+            color: white;
+            padding: 4px 20px;
+            border-radius: 4px;
+            font-weight: 800;
+            text-transform: uppercase;
+            transform: rotate(-2deg);
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        }
+
+        .tab-btn.active {
+            background-color: var(--sky-blue);
+            color: white;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        /* Creative Overlapping Image Layout */
+        .image-stack {
+            position: relative;
+            height: 480px;
+        }
+        .image-stack-item {
+            position: absolute;
+            border-radius: 2rem;
+            border: 8px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.5s ease;
+        }
+        .image-stack-item:hover {
+            z-index: 60 !important;
+            transform: scale(1.05) rotate(0deg) !important;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="progress-indicator" class="fixed top-0 left-0 h-2 bg-gradient-to-r from-sky-500 to-yellow-400 z-[1000] transition-all duration-300" style="width: 0%"></div>
+    <div id="cursor-balloon" class="hidden md:block"></div>
+    <div id="mela-background" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+    <!-- Mobile Bottom Sticky Bar -->
+    <div class="md:hidden fixed bottom-0 left-0 w-full z-[100] sticky-dock px-10 py-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-sky-600">
+        <a href="#register" class="flex flex-col items-center gap-1 active:scale-90 transition"><i data-lucide="ticket"></i> Join</a>
+        <a href="#activities" class="flex flex-col items-center gap-1 active:scale-90 transition"><i data-lucide="map"></i> Map</a>
+        <div class="w-16 h-16 bg-yellow-400 rounded-full -mt-14 border-4 border-white flex items-center justify-center shadow-2xl active:scale-125 transition">
+            <i data-lucide="party-popper" class="text-sky-900 w-7 h-7"></i>
+        </div>
+        <a href="#gallery" class="flex flex-col items-center gap-1 active:scale-90 transition"><i data-lucide="heart"></i> Smiles</a>
+        <a href="#contact" class="flex flex-col items-center gap-1 active:scale-90 transition"><i data-lucide="phone"></i> Call</a>
+    </div>
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 bg-white/60 backdrop-blur-xl border-b border-white">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-2 group cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 bg-sky-500 rounded-2xl flex items-center justify-center -rotate-6 group-hover:rotate-12 transition shadow-xl">
+                        <i data-lucide="sun" class="text-white w-6 h-6"></i>
+                    </div>
+                    <span class="text-2xl font-bungee text-sky-600 tracking-tighter">HAPPY STREET</span>
+                </div>
+                <div class="hidden md:flex space-x-12 items-center text-[11px] font-black tracking-[0.3em] text-slate-400 uppercase">
+                    <a href="#about" class="hover:text-sky-600 transition">Our Story</a>
+                    <a href="#activities" class="hover:text-sky-600 transition">The Zones</a>
+                    <a href="#gallery" class="hover:text-pink-500 transition">Moments</a>
+                    <a href="#register" class="bg-sky-500 text-white px-8 py-3 rounded-full hover:shadow-xl transition transform hover:-translate-y-1">GET INVOLVED</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=2070&auto=format&fit=crop');">
+        <div class="absolute inset-0 bg-gradient-to-br from-sky-500/85 via-sky-600/75 to-yellow-400/80"></div>
+        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/handmade-paper.png')]"></div>
+        
+        <div class="relative z-10 text-center px-4 max-w-5xl">
+            <div class="reveal active flex flex-col items-center">
+                <div class="inline-block bg-white/20 backdrop-blur-md px-6 py-2 rounded-full text-[10px] font-black tracking-widest text-white mb-10 border border-white/30 uppercase">
+                    Godhani Nagpur • 1st March • Smiles for Free
+                </div>
+                
+                <div class="poster-badge mb-6">
+                    First Time Ever!
+                </div>
+                
+                <div class="flex flex-col items-center select-none space-y-2">
+                    <h1 class="text-6xl md:text-[11rem] font-bungee leading-[0.8] text-white drop-shadow-[0_20px_0_rgba(0,0,0,0.1)]">
+                        HAPPY<br>
+                        <span class="inline-block -rotate-2 transform">STREET</span><br>
+                        GODHANI
+                    </h1>
+                </div>
+
+                <p class="font-hand text-3xl md:text-7xl text-white mt-12 mb-20 drop-shadow-md">
+                    Where Streets Turn Into <span class="text-yellow-300 underline decoration-white decoration-wavy">Smiles</span> 😊
+                </p>
+
+                <div class="flex justify-center">
+                    <a href="#register" class="btn-road-sign">
+                        <span class="text-xs font-black uppercase tracking-tighter opacity-70 mb-1">Entrance</span>
+                        ENTER THE<br>STREET ➡️
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- First Turn -->
+    <div class="street-turn-left"></div>
+
+    <!-- About Section -->
+    <section id="about" class="py-32 relative bg-transparent">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-24 items-center">
+            <div class="reveal">
+                <h2 class="text-5xl md:text-7xl font-bold mb-10 leading-tight text-slate-800">
+                    No traffic.<br>No stress.<br><span class="text-sky-500 italic doodle-underline">Just joy. ✨</span>
+                </h2>
+                <div class="space-y-8 text-xl text-slate-500 leading-relaxed font-medium">
+                    <p>
+                        Happy Street Godhani is a community initiative that transforms our busy roads into a safe, joyful playground. It's a platform where friends and neighbors come together for health and happiness.
+                    </p>
+                    <div class="flex items-center gap-6 mt-12">
+                        <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-3xl flex items-center justify-center">
+                            <i data-lucide="heart" class="w-8 h-8 fill-current"></i>
+                        </div>
+                        <p class="font-bold text-slate-700">Health | Happiness | Unity</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="reveal relative image-stack hidden lg:block" style="transition-delay: 0.2s;">
+                <!-- Original Stack Item 1 -->
+                <div class="image-stack-item top-0 left-0 w-64 h-72 z-20 rotate-[-8deg]">
+                    <img src="https://newpleasuretreasure.com/wp-content/uploads/2019/04/IMG_7548.jpg" class="w-full h-full object-cover rounded-[1.5rem]" alt="Happy Street Crowd">
+                </div>
+                <!-- Original Stack Item 2 -->
+                <div class="image-stack-item bottom-0 right-0 w-72 h-80 z-10 rotate-[12deg]">
+                    <img src="https://wpmedia.prabhatkhabar.com/uploads/2024/12/happy-street-bokaro-1-1024x683.jpg" class="w-full h-full object-cover rounded-[1.5rem]" alt="Street Festival">
+                </div>
+                <!-- Extra Stack Item for user's previous request -->
+                <div class="image-stack-item bottom-4 left-1/4 w-60 h-64 z-30 rotate-[3deg]">
+                    <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjH3OYBMTs_tGO2BJ1w72Ob3wVPYoX9nTCyRAQDdKJSsDl0KUFRUX__PDf9RL3l17_OkF52d_AQEzyDFm5lnsNBYNl-fVRnedOVBoShk761Op8DMPCvZq2wgNkG-cgg3jJ1d8hI4A/s640/photo+time.jpg" class="w-full h-full object-cover rounded-[1.5rem]" alt="Happy Moments">
+                </div>
+                <!-- Top Center Info Card -->
+                <div class="image-stack-item top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-48 z-50 rotate-[-2deg]">
+                    <div class="bg-sky-500 w-full h-full rounded-[1.5rem] flex items-center justify-center text-white p-6 text-center shadow-2xl">
+                        <p class="font-bungee text-2xl uppercase tracking-tighter">Feel the<br>Street Energy!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile View Images -->
+            <div class="reveal lg:hidden space-y-8">
+                <div class="bg-white p-4 rounded-[3rem] shadow-xl border-4 border-white overflow-hidden">
+                    <img src="https://newpleasuretreasure.com/wp-content/uploads/2019/04/IMG_7548.jpg" alt="Happy Street Moments" class="w-full rounded-[2.5rem]">
+                </div>
+                <div class="bg-white p-4 rounded-[3rem] shadow-xl border-4 border-white overflow-hidden">
+                    <img src="https://wpmedia.prabhatkhabar.com/uploads/2024/12/happy-street-bokaro-1-1024x683.jpg" alt="Happy Street Celebration" class="w-full rounded-[2.5rem]">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Turn Back -->
+    <div class="street-turn-right"></div>
+
+    <!-- Activities Section -->
+    <section id="activities" class="py-32 relative overflow-hidden bg-transparent">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="text-center mb-24 reveal">
+                <h2 class="text-6xl font-bold mb-6 text-slate-800">Explore the Zones 🗺️</h2>
+                <p class="font-hand text-3xl text-sky-500">Walk through the streets of happiness!</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-center">
+                <div class="reveal group">
+                    <div class="shape-oval bg-lime-100 p-12 aspect-square flex flex-col items-center justify-center shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-4 border-4 border-white">
+                        <i data-lucide="music" class="w-16 h-16 text-lime-600 mb-6 group-hover:scale-125 transition"></i>
+                        <h3 class="text-2xl font-bold mb-2">Dance Shows</h3>
+                        <p class="text-[10px] font-black uppercase text-lime-700 opacity-60 tracking-widest">Live Performance</p>
+                    </div>
+                </div>
+                <div class="reveal group" style="transition-delay: 0.1s;">
+                    <div class="shape-wave bg-purple-100 p-12 aspect-square flex flex-col items-center justify-center shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-4 border-4 border-white">
+                        <i data-lucide="zap" class="w-16 h-16 text-purple-600 mb-6 group-hover:rotate-12 transition"></i>
+                        <h3 class="text-2xl font-bold mb-2">Zumba & Games</h3>
+                        <p class="text-[10px] font-black uppercase text-purple-700 opacity-60 tracking-widest">Fitness Party</p>
+                    </div>
+                </div>
+                <div class="reveal group" style="transition-delay: 0.2s;">
+                    <div class="shape-cloud bg-orange-100 p-12 aspect-square flex flex-col items-center justify-center shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-4 border-4 border-white">
+                        <i data-lucide="palette" class="w-16 h-16 text-orange-600 mb-6 group-hover:scale-110 transition"></i>
+                        <h3 class="text-2xl font-bold mb-2">Creative Acts</h3>
+                        <p class="text-[10px] font-black uppercase text-orange-700 opacity-60 tracking-widest">Art & Craft</p>
+                    </div>
+                </div>
+                <div class="reveal group" style="transition-delay: 0.3s;">
+                    <div class="shape-splash bg-pink-100 p-12 aspect-square flex flex-col items-center justify-center shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-4 border-4 border-white">
+                        <i data-lucide="camera" class="w-16 h-16 text-pink-600 mb-6 group-hover:-rotate-12 transition"></i>
+                        <h3 class="text-2xl font-bold mb-2">Influencers</h3>
+                        <p class="text-[10px] font-black uppercase text-pink-700 opacity-60 tracking-widest">Meet & Greet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Get Involved Section -->
+    <section id="register" class="py-32 relative bg-transparent">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-5xl font-bold mb-4 uppercase tracking-tighter text-slate-800">Get Involved 🚀</h2>
+                <p class="text-slate-500 font-medium">Whether you want to perform, sell, sponsor, or help out—there's a spot for everyone!</p>
+            </div>
+
+            <!-- Tab System -->
+            <div class="flex flex-wrap justify-center gap-3 mb-12 reveal">
+                <button onclick="switchTab('visitor')" id="tab-visitor" class="tab-btn active px-6 py-2.5 rounded-full font-bold transition-all border-2 border-slate-200 bg-white hover:border-sky-200 text-sm">General Enquiry</button>
+                <button onclick="switchTab('volunteer')" id="tab-volunteer" class="tab-btn px-6 py-2.5 rounded-full font-bold transition-all border-2 border-slate-200 bg-white hover:border-sky-200 text-sm">Volunteer</button>
+                <button onclick="switchTab('performer')" id="tab-performer" class="tab-btn px-6 py-2.5 rounded-full font-bold transition-all border-2 border-slate-200 bg-white hover:border-sky-200 text-sm">Perform Art/Dance</button>
+                <button onclick="switchTab('stall')" id="tab-stall" class="tab-btn px-6 py-2.5 rounded-full font-bold transition-all border-2 border-slate-200 bg-white hover:border-sky-200 text-sm">Book a Stall</button>
+                <button onclick="switchTab('sponsor')" id="tab-sponsor" class="tab-btn px-6 py-2.5 rounded-full font-bold transition-all border-2 border-slate-200 bg-white hover:border-sky-200 text-sm">Sponsorship</button>
+                <button onclick="switchTab('other')" id="tab-other" class="tab-btn px-6 py-2.5 rounded-full font-bold transition-all border-2 border-slate-200 bg-white hover:border-sky-200 text-sm">Other / Custom</button>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-md p-8 md:p-16 rounded-[4rem] shadow-2xl border-4 border-white reveal relative overflow-hidden">
+                <form id="involved-form" class="space-y-6 relative z-10">
+                    <input type="hidden" id="form-type" value="visitor">
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Full Name</label>
+                            <input type="text" id="name-input" placeholder="Your Name 😊" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">WhatsApp Number</label>
+                            <input type="tel" id="phone-input" placeholder="92269 XXXXX 💬" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                        </div>
+                    </div>
+
+                    <div id="dynamic-fields" class="space-y-6"></div>
+
+                    <div>
+                        <label id="details-label" class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Details or Custom Inquiry</label>
+                        <textarea id="details-textarea" placeholder="Tell us exactly how you want to be part of the street festival..." class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold h-32" required></textarea>
+                    </div>
+
+                    <button type="submit" id="submit-btn" class="w-full py-6 bg-sky-500 text-white font-black rounded-[2.5rem] text-xl shadow-xl hover:bg-sky-600 transition active:scale-95 transform hover:-translate-y-1 uppercase tracking-widest">
+                        Submit Application 🚀
+                    </button>
+                </form>
+                <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-yellow-400/10 rounded-full blur-3xl"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-40 bg-sky-600 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-6xl font-bold mb-4 text-white tracking-tighter">Memory Wall ❤️</h2>
+            <p class="font-hand text-4xl text-yellow-300 mb-10">Click • Smile • Share #HappyStreetGodhani</p>
+            
+            <a href="https://www.instagram.com/godhanivibes?utm_source=qr&igsh=MXR2ZXdwNGhsMGVyZg==" target="_blank" class="inline-flex items-center gap-3 bg-white text-sky-600 px-10 py-4 rounded-full font-black text-xl shadow-2xl hover:scale-105 transition mb-20 border-4 border-yellow-400">
+                <i data-lucide="instagram" class="w-8 h-8 text-pink-500"></i> FOLLOW @GODHANIVIBES
+            </a>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 text-left">
+                <div class="scrapbook-card -rotate-2 reveal">
+                    <div class="bg-slate-100 aspect-square mb-6 overflow-hidden rounded-sm">
+                        <img src="https://www.millenniumpost.in/h-upload/2025/01/23/829830-20250123124022.webp" alt="Early Energy" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-hand text-3xl text-slate-700">Early Energy! ⚡</p>
+                    <button class="absolute bottom-4 right-4 text-pink-500 hover:scale-125 transition"><i data-lucide="heart" class="fill-current"></i></button>
+                </div>
+                <div class="scrapbook-card rotate-3 reveal" style="transition-delay: 0.1s;">
+                    <div class="bg-slate-100 aspect-square mb-6 overflow-hidden rounded-sm">
+                        <img src="https://www.campustimespune.com/wp-content/uploads/2015/05/Happy-Streets-Pune-Aundh-Street-Dancing-Flash-Mob-620x330.jpg" alt="Zumba Vibes" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-hand text-3xl text-slate-700">Zumba Vibes! 🕺</p>
+                    <button class="absolute bottom-4 right-4 text-pink-500 hover:scale-125 transition"><i data-lucide="heart" class="fill-current"></i></button>
+                </div>
+                <div class="scrapbook-card -rotate-1 reveal" style="transition-delay: 0.2s;">
+                    <div class="bg-slate-100 aspect-square mb-6 overflow-hidden rounded-sm">
+                        <img src="https://static.toiimg.com/thumb/msid-120389595,width-400,height-225,resizemode-72/Happy-Streets-to-debut-at-Kukatpally-on-Sunday.jpg" alt="Togetherness" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-hand text-3xl text-slate-700">Togetherness. 🧡</p>
+                    <button class="absolute bottom-4 right-4 text-pink-500 hover:scale-125 transition"><i data-lucide="heart" class="fill-current"></i></button>
+                </div>
+                <div class="scrapbook-card rotate-1 reveal" style="transition-delay: 0.3s;">
+                    <div class="bg-slate-100 aspect-square mb-6 overflow-hidden rounded-sm">
+                        <img src="https://static.toiimg.com/thumb/msid-92294957,width-1280,height-720,resizemode-72/92294957.jpg" alt="Best morning" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-hand text-3xl text-slate-700">Best morning! 🌈</p>
+                    <button class="absolute bottom-4 right-4 text-pink-500 hover:scale-125 transition"><i data-lucide="heart" class="fill-current"></i></button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Schedule Section -->
+    <section id="schedule" class="py-32 relative bg-transparent overflow-hidden">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-center text-5xl font-bold mb-24 reveal text-slate-800">Event Details ⏳</h2>
+            
+            <div class="space-y-40 relative">
+                <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-sky-200 -translate-x-1/2 hidden md:block border-l-4 border-dashed border-sky-300"></div>
+
+                <div class="flex flex-col md:flex-row items-center gap-12 reveal">
+                    <div class="md:w-1/2 md:text-right">
+                        <h4 class="text-4xl font-bold text-sky-600 uppercase tracking-tighter">1 March</h4>
+                        <p class="text-slate-500 text-xl font-medium">Sunday Morning</p>
+                    </div>
+                    <div class="w-14 h-14 bg-sky-500 rounded-full border-4 border-white shadow-xl relative z-10 flex items-center justify-center">
+                        <i data-lucide="calendar" class="text-white w-6 h-6"></i>
+                    </div>
+                    <div class="md:w-1/2 text-left">
+                        <span class="bg-yellow-400 text-[10px] font-black px-4 py-1.5 rounded-full text-sky-900 uppercase tracking-widest">Save the Date</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row-reverse items-center gap-12 reveal">
+                    <div class="md:w-1/2 md:text-left">
+                        <h4 class="text-4xl font-bold text-yellow-500 uppercase tracking-tighter">5:30 AM</h4>
+                        <p class="text-slate-500 text-xl font-medium">Onwards</p>
+                    </div>
+                    <div class="w-14 h-14 bg-yellow-400 rounded-full border-4 border-white shadow-xl relative z-10 flex items-center justify-center">
+                        <i data-lucide="clock" class="text-sky-900 w-6 h-6"></i>
+                    </div>
+                    <div class="md:w-1/2 text-right">
+                        <span class="bg-pink-400 text-[10px] font-black px-4 py-1.5 rounded-full text-white uppercase tracking-widest">Early Bird Fun</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row items-center gap-12 reveal">
+                    <div class="md:w-1/2 md:text-right">
+                        <h4 class="text-3xl md:text-4xl font-bold text-pink-500 uppercase tracking-tighter">Satyam Garden</h4>
+                        <p class="text-slate-500 text-xl font-medium">Godhani, Nagpur</p>
+                    </div>
+                    <div class="w-14 h-14 bg-pink-500 rounded-full border-4 border-white shadow-xl relative z-10 flex items-center justify-center">
+                        <i data-lucide="map-pin" class="text-white w-6 h-6"></i>
+                    </div>
+                    <div class="md:w-1/2 text-left">
+                        <span class="bg-sky-400 text-[10px] font-black px-4 py-1.5 rounded-full text-white uppercase tracking-widest">The Main Hub</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="py-32 relative bg-white/40 backdrop-blur-sm text-center border-t border-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl font-bold mb-10 text-slate-800">See you at Godhani! 📍</h2>
+            
+            <div class="flex flex-col md:flex-row justify-center items-center gap-8 mb-20">
+                <a href="https://maps.app.goo.gl/K6cVhaRZrx8iJFxb8" target="_blank" class="group bg-white/90 p-8 rounded-[3.5rem] shadow-xl hover:scale-105 transition-all border-4 border-slate-50 flex items-center gap-8 text-left w-full md:w-auto">
+                    <div class="w-20 h-20 bg-sky-500 text-white rounded-3xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition"><i data-lucide="map-pin" class="w-8 h-8"></i></div>
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-1">Event Venue</p>
+                        <p class="text-2xl font-bold">Satyam Garden, Godhani</p>
+                    </div>
+                </a>
+
+                <div class="flex flex-col gap-4">
+                    <a href="tel:9579915980" class="flex items-center gap-3 bg-green-50 px-8 py-4 rounded-full border-2 border-green-200 text-green-700 font-bold hover:bg-green-100 transition">
+                        <i data-lucide="phone" class="w-5 h-5"></i> 95799 15980
+                    </a>
+                    <a href="tel:9226965350" class="flex items-center gap-3 bg-green-50 px-8 py-4 rounded-full border-2 border-green-200 text-green-700 font-bold hover:bg-green-100 transition">
+                        <i data-lucide="phone" class="w-5 h-5"></i> 92269 65350
+                    </a>
+                </div>
+            </div>
+            
+            <div class="flex justify-center gap-16 text-slate-400">
+                <a href="https://www.instagram.com/godhanivibes?utm_source=qr&igsh=MXR2ZXdwNGhsMGVyZg==" target="_blank" class="hover:text-pink-500 transition transform hover:scale-125">
+                    <i data-lucide="instagram" class="w-10 h-10"></i>
+                </a>
+                <a href="https://wa.me/9579915980" target="_blank" class="hover:text-green-500 transition transform hover:scale-125">
+                    <i data-lucide="message-circle" class="w-10 h-10"></i>
+                </a>
+                <i data-lucide="facebook" class="w-10 h-10 hover:text-sky-500 transition cursor-pointer"></i>
+            </div>
+            
+            <div class="mt-20 text-6xl font-bungee text-sky-500/10 uppercase tracking-tighter">HAPPY STREET GODHANI</div>
+            <p class="text-[10px] font-black text-slate-400 tracking-[0.8em] uppercase mt-4">Where Streets Turn Into Smiles 😊</p>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        // 1. Balloon Cursor Trail
+        const cursor = document.getElementById('cursor-balloon');
+        document.addEventListener('mousemove', (e) => {
+            if (cursor) {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            }
+        });
+
+        // 2. Tab System Logic
+        function switchTab(type) {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(t => t.classList.remove('active'));
+            const activeTab = document.getElementById('tab-' + type);
+            if (activeTab) activeTab.classList.add('active');
+            
+            document.getElementById('form-type').value = type;
+            const dynamicFields = document.getElementById('dynamic-fields');
+            const detailsLabel = document.getElementById('details-label');
+            const detailsTextarea = document.getElementById('details-textarea');
+            
+            let html = '';
+            detailsLabel.innerText = "Details or Custom Inquiry";
+            detailsTextarea.placeholder = "Tell us exactly how you want to be part of the street festival...";
+
+            if (type === 'volunteer') {
+                html = `
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">How can you help?</label>
+                        <select id="help-select" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                            <option>Crowd Management</option>
+                            <option>Stage Coordination</option>
+                            <option>Decoration Team</option>
+                            <option>Social Media & Photography</option>
+                            <option value="other">Other (Specify in Message)</option>
+                        </select>
+                    </div>
+                `;
+                detailsLabel.innerText = "Why do you want to join the team?";
+                detailsTextarea.placeholder = "Tell us about your previous experience or just your enthusiasm!";
+            } else if (type === 'performer') {
+                html = `
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Performance Category</label>
+                        <select id="performance-select" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                            <option>Dance Show</option>
+                            <option>Live Band/Singing</option>
+                            <option>Beatboxing</option>
+                            <option>Open Mic/Poetry</option>
+                            <option value="other">Other (Specify in Message)</option>
+                        </select>
+                    </div>
+                `;
+                detailsLabel.innerText = "Performance Description";
+                detailsTextarea.placeholder = "Tell us about your act, team size, and duration...";
+            } else if (type === 'stall') {
+                html = `
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Stall/Brand Name</label>
+                            <input type="text" id="brand-input" placeholder="My Awesome Business" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Stall Type</label>
+                            <select id="stall-select" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                                <option>Food & Beverages</option>
+                                <option>Handicrafts/Art</option>
+                                <option>Promotion/Service</option>
+                                <option value="other">Other (Specify in Message)</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                detailsLabel.innerText = "Stall Requirements";
+                detailsTextarea.placeholder = "Do you need electricity, water, or specific space size?";
+            } else if (type === 'sponsor') {
+                html = `
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Company Name</label>
+                            <input type="text" id="company-input" placeholder="Your Brand" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Sponsorship Level</label>
+                            <select id="sponsor-select" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                                <option>Title Partner</option>
+                                <option>Associate Partner</option>
+                                <option>Support Partner</option>
+                                <option value="other">Other / Custom Support</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+                detailsLabel.innerText = "Partnership Vision";
+                detailsTextarea.placeholder = "How would you like your brand to be integrated into Happy Street?";
+            } else if (type === 'other') {
+                html = `
+                    <div>
+                        <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">What's your Idea?</label>
+                        <input type="text" id="idea-input" placeholder="e.g. Workshop, Volunteer Team, Media Partner" class="w-full px-6 py-4 rounded-3xl bg-slate-50 border-2 border-transparent focus:border-sky-500 outline-none transition font-bold" required>
+                    </div>
+                `;
+            }
+            dynamicFields.innerHTML = html;
+        }
+
+        window.onload = () => switchTab('visitor');
+
+        const reveal = () => {
+            const reveals = document.querySelectorAll('.reveal');
+            const indicator = document.getElementById('progress-indicator');
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            if (indicator) indicator.style.width = scrolled + "%";
+            reveals.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight * 0.9) {
+                    el.classList.add('active');
+                }
+            });
+        };
+        window.addEventListener('scroll', reveal);
+        reveal();
+
+        const melaContainer = document.getElementById('mela-background');
+        const melaIcons = ['party-popper', 'heart', 'star', 'music', 'smile', 'zap'];
+        function spawnMelaItem() {
+            if (!melaContainer) return;
+            const el = document.createElement('div');
+            el.className = 'mela-item';
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.bottom = '-10vh';
+            el.style.animationDuration = (Math.random() * 5 + 8) + 's';
+            const iconName = melaIcons[Math.floor(Math.random() * melaIcons.length)];
+            el.innerHTML = `<i data-lucide="${iconName}" style="width: ${Math.random()*40 + 20}px"></i>`;
+            melaContainer.appendChild(el);
+            lucide.createIcons({attrs: {'stroke-width': 1.5}});
+            setTimeout(() => el.remove(), 10000);
+        }
+        setInterval(spawnMelaItem, 3000);
+
+        // ========== UPDATED FORM SUBMISSION WITH DATABASE ==========
+        const joyForm = document.getElementById('involved-form');
+        if (joyForm) {
+            joyForm.onsubmit = async (e) => {
+                e.preventDefault();
+                
+                // Get form data
+                const formType = document.getElementById('form-type').value;
+                const nameInput = document.getElementById('name-input');
+                const phoneInput = document.getElementById('phone-input');
+                const detailsTextarea = document.getElementById('details-textarea');
+                
+                const formData = {
+                    formType: formType,
+                    name: nameInput ? nameInput.value : '',
+                    phone: phoneInput ? phoneInput.value : '',
+                    details: detailsTextarea ? detailsTextarea.value : ''
+                };
+                
+                // Collect dynamic fields based on form type
+                const dynamicFields = document.getElementById('dynamic-fields');
+                if (dynamicFields) {
+                    if (formType === 'volunteer') {
+                        const helpSelect = document.getElementById('help-select');
+                        if (helpSelect) formData.helpType = helpSelect.value;
+                    } else if (formType === 'performer') {
+                        const performanceSelect = document.getElementById('performance-select');
+                        if (performanceSelect) formData.performanceCategory = performanceSelect.value;
+                    } else if (formType === 'stall') {
+                        const brandInput = document.getElementById('brand-input');
+                        const stallSelect = document.getElementById('stall-select');
+                        if (brandInput) formData.brandName = brandInput.value;
+                        if (stallSelect) formData.stallType = stallSelect.value;
+                    } else if (formType === 'sponsor') {
+                        const companyInput = document.getElementById('company-input');
+                        const sponsorSelect = document.getElementById('sponsor-select');
+                        if (companyInput) formData.companyName = companyInput.value;
+                        if (sponsorSelect) formData.sponsorshipLevel = sponsorSelect.value;
+                    } else if (formType === 'other') {
+                        const ideaInput = document.getElementById('idea-input');
+                        if (ideaInput) formData.customIdea = ideaInput.value;
+                    }
+                }
+                
+                // Show loading state
+                const submitBtn = document.getElementById('submit-btn');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner spinner mr-2"></i> Submitting...';
+                submitBtn.disabled = true;
+                
+                try {
+                    // Send to backend API
+                    // Note: In production, change this URL to your actual backend URL
+                    const backendUrl = window.location.hostname === 'localhost' 
+                        ? 'http://localhost:3000' 
+                        : window.location.origin; // Same origin for deployment
+                    
+                    const response = await fetch(`${backendUrl}/api/submit`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Success - show custom alert
+                        showCustomAlert(
+                            'success',
+                            '🎉 Application Submitted!',
+                            result.message || 'Our team will contact you soon on WhatsApp. 🎟️🚀'
+                        );
+                        
+                        // Reset form
+                        joyForm.reset();
+                        switchTab('visitor'); // Reset to default tab
+                    } else {
+                        // Error
+                        showCustomAlert(
+                            'error',
+                            '⚠️ Submission Failed',
+                            result.error || 'Something went wrong. Please try again.'
+                        );
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showCustomAlert(
+                        'error',
+                        '⚠️ Network Error',
+                        'Please check your internet connection and try again.'
+                    );
+                } finally {
+                    // Reset button
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            };
+        }
+
+        // Custom alert function
+        function showCustomAlert(type, title, message) {
+            // Remove any existing alert
+            const existingAlert = document.querySelector('.custom-alert');
+            if (existingAlert) existingAlert.remove();
+            
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `custom-alert fixed top-6 right-6 z-[9999] p-6 rounded-2xl shadow-2xl border-4 backdrop-blur-md animate-slide-in ${type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`;
+            alertDiv.innerHTML = `
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center ${type === 'success' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'} text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold mb-2 ${type === 'success' ? 'text-green-800' : 'text-red-800'}">${title}</h3>
+                        <p class="${type === 'success' ? 'text-green-700' : 'text-red-700'}">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Add animation style
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                .animate-slide-in {
+                    animation: slideIn 0.3s ease-out forwards;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentElement) {
+                    alertDiv.style.opacity = '0';
+                    alertDiv.style.transform = 'translateX(100%)';
+                    setTimeout(() => alertDiv.remove(), 300);
+                }
+            }, 5000);
+        }
+
+        // Add a link to admin panel in the footer for easy access
+        window.addEventListener('load', () => {
+            const footer = document.querySelector('footer');
+            if (footer) {
+                const adminLink = document.createElement('div');
+                adminLink.className = 'mt-8 text-center';
+                adminLink.innerHTML = `
+                    <a href="/admin" class="inline-flex items-center gap-2 bg-purple-500 text-white px-6 py-3 rounded-full hover:bg-purple-600 transition font-bold text-sm">
+                        <i class="fas fa-lock"></i>
+                        Admin Panel
+                    </a>
+                `;
+                footer.querySelector('.max-w-7xl').appendChild(adminLink);
+            }
+        });
+    </script>
+</body>
+</html>

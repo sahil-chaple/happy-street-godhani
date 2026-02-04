@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Street Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
+    <div id="app" class="min-h-screen">
+        <!-- Login Page -->
+        <div v-if="!isLoggedIn" class="flex items-center justify-center min-h-screen px-4">
+            <div class="glass-effect p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/50">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mb-4">
+                        <i class="fas fa-lock text-white text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-800">Happy Street Admin</h1>
+                    <p class="text-gray-600 mt-2">Secure Access Panel</p>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                        <input v-model="loginData.username" type="text" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                               placeholder="Enter username">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input v-model="loginData.password" type="password" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                               placeholder="Enter password">
+                    </div>
+                    
+                    <div v-if="loginError" class="p-3 bg-red-50 border border-red-200 rounded-xl">
+                        <p class="text-red-600 text-sm">{{ loginError }}</p>
+                    </div>
+                    
+                    <button @click="handleLogin" 
+                            class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition active:scale-95">
+                        <i class="fas fa-sign-in-alt mr-2"></i> Login to Dashboard
+                    </button>
+                    
+                    <div class="text-center text-sm text-gray-500">
+                        <p>Default: admin / admin123</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div v-else>
+            <!-- Header -->
+            <header class="glass-effect border-b border-white/50 sticky top-0 z-50">
+                <div class="container mx-auto px-6 py-4">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-street-view text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-800">Happy Street Admin</h1>
+                                <p class="text-sm text-gray-600">Godhani, Nagpur</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            <button @click="exportCSV" 
+                                    class="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl transition">
+                                <i class="fas fa-download"></i>
+                                <span>Export CSV</span>
+                            </button>
+                            <button @click="handleLogout" 
+                                    class="flex items-center space-x-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <div class="container mx-auto px-6 py-8">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-effect p-6 rounded-2xl shadow-lg border border-white/50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Total Applications</p>
+                                <p class="text-3xl font-bold text-gray-800">{{ stats.total }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-users text-blue-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-effect p-6 rounded-2xl shadow-lg border border-white/50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Pending</p>
+                                <p class="text-3xl font-bold text-yellow-600">{{ stats.pending }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-clock text-yellow-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-effect p-6 rounded-2xl shadow-lg border border-white/50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Approved</p>
+                                <p class="text-3xl font-bold text-green-600">{{ stats.approved }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-effect p-6 rounded-2xl shadow-lg border border-white/50">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Rejected</p>
+                                <p class="text-3xl font-bold text-red-600">{{ stats.rejected }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-times-circle text-red-500 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="container mx-auto px-6 pb-12">
+                <div class="glass-effect rounded-2xl shadow-xl overflow-hidden border border-white/50">
+                    <!-- Table Header -->
+                    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                        <h2 class="text-xl font-bold text-gray-800">All Applications</h2>
+                        <div class="flex items-center space-x-4">
+                            <input v-model="searchQuery" 
+                                   type="text" 
+                                   placeholder="Search applications..." 
+                                   class="px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button @click="refreshData" 
+                                    class="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name & Phone</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr v-for="sub in filteredSubmissions" :key="sub._id" 
+                                    class="hover:bg-gray-50 transition">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ formatDate(sub.submittedAt) }}</div>
+                                        <div class="text-xs text-gray-500">{{ formatTime(sub.submittedAt) }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ sub.name }}</div>
+                                        <div class="text-sm text-gray-500">{{ sub.phone }}</div>
+                                        <div v-if="sub.email" class="text-xs text-blue-600">{{ sub.email }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1 text-xs font-semibold rounded-full" 
+                                              :class="getTypeClass(sub.formType)">
+                                            {{ sub.formType }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-900 max-w-xs truncate" :title="sub.details">
+                                            {{ sub.details }}
+                                        </div>
+                                        <div v-if="sub.brandName" class="text-xs text-gray-500">
+                                            Brand: {{ sub.brandName }}
+                                        </div>
+                                        <div v-if="sub.companyName" class="text-xs text-gray-500">
+                                            Company: {{ sub.companyName }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <select v-model="sub.status" 
+                                                @change="updateStatus(sub._id, sub.status)"
+                                                class="status-badge border-none outline-none cursor-pointer"
+                                                :class="getStatusClass(sub.status)">
+                                            <option value="pending">Pending</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="rejected">Rejected</option>
+                                        </select>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <button @click="viewDetails(sub)" 
+                                                class="text-blue-600 hover:text-blue-900 mr-3">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button @click="deleteSubmission(sub._id)" 
+                                                class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Details Modal -->
+        <div v-if="viewingSubmission" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="glass-effect rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-xl font-bold text-gray-800">Application Details</h3>
+                    <button @click="viewingSubmission = null" 
+                            class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Full Name</label>
+                                <p class="text-lg font-semibold">{{ viewingSubmission.name }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Phone Number</label>
+                                <p class="text-lg font-semibold">{{ viewingSubmission.phone }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Form Type</label>
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full" 
+                                      :class="getTypeClass(viewingSubmission.formType)">
+                                    {{ viewingSubmission.formType }}
+                                </span>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Submitted On</label>
+                                <p>{{ formatDateTime(viewingSubmission.submittedAt) }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div v-if="viewingSubmission.email">
+                                <label class="block text-sm font-medium text-gray-500">Email</label>
+                                <p>{{ viewingSubmission.email }}</p>
+                            </div>
+                            <div v-if="viewingSubmission.brandName">
+                                <label class="block text-sm font-medium text-gray-500">Brand/Stall Name</label>
+                                <p>{{ viewingSubmission.brandName }}</p>
+                            </div>
+                            <div v-if="viewingSubmission.companyName">
+                                <label class="block text-sm font-medium text-gray-500">Company Name</label>
+                                <p>{{ viewingSubmission.companyName }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Current Status</label>
+                                <select v-model="viewingSubmission.status" 
+                                        @change="updateStatus(viewingSubmission._id, viewingSubmission.status)"
+                                        class="status-badge border-none outline-none cursor-pointer"
+                                        :class="getStatusClass(viewingSubmission.status)">
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <label class="block text-sm font-medium text-gray-500 mb-2">Application Details</label>
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <p class="text-gray-800 whitespace-pre-line">{{ viewingSubmission.details }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-4">
+                        <button @click="viewingSubmission = null" 
+                                class="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition">
+                            Close
+                        </button>
+                        <button @click="viewingSubmission = null; refreshData();" 
+                                class="px-6 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition">
+                            Done
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script>
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                const isLoggedIn = ref(false);
+                const loginData = ref({ username: '', password: '' });
+                const loginError = ref('');
+                const submissions = ref([]);
+                const viewingSubmission = ref(null);
+                const searchQuery = ref('');
+                const token = ref(localStorage.getItem('happyStreetToken') || '');
+                
+                const stats = computed(() => {
+                    const total = submissions.value.length;
+                    const pending = submissions.value.filter(s => s.status === 'pending').length;
+                    const approved = submissions.value.filter(s => s.status === 'approved').length;
+                    const rejected = submissions.value.filter(s => s.status === 'rejected').length;
+                    return { total, pending, approved, rejected };
+                });
+                
+                const filteredSubmissions = computed(() => {
+                    if (!searchQuery.value) return submissions.value;
+                    const query = searchQuery.value.toLowerCase();
+                    return submissions.value.filter(sub => 
+                        sub.name.toLowerCase().includes(query) ||
+                        sub.phone.includes(query) ||
+                        sub.formType.toLowerCase().includes(query) ||
+                        sub.details.toLowerCase().includes(query)
+                    );
+                });
+                
+                const handleLogin = async () => {
+                    try {
+                        const response = await fetch('/api/admin/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(loginData.value)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            token.value = data.token;
+                            localStorage.setItem('happyStreetToken', data.token);
+                            isLoggedIn.value = true;
+                            await fetchSubmissions();
+                        } else {
+                            loginError.value = data.error || 'Login failed';
+                        }
+                    } catch (error) {
+                        loginError.value = 'Network error. Please try again.';
+                    }
+                };
+                
+                const handleLogout = () => {
+                    token.value = '';
+                    localStorage.removeItem('happyStreetToken');
+                    isLoggedIn.value = false;
+                    submissions.value = [];
+                };
+                
+                const fetchSubmissions = async () => {
+                    try {
+                        const response = await fetch('/api/submissions', {
+                            headers: { 'Authorization': `Bearer ${token.value}` }
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            submissions.value = data.data;
+                        } else if (response.status === 401) {
+                            handleLogout();
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                };
+                
+                const refreshData = async () => {
+                    await fetchSubmissions();
+                };
+                
+                const updateStatus = async (id, status) => {
+                    try {
+                        await fetch(`/api/submissions/${id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token.value}`
+                            },
+                            body: JSON.stringify({ status })
+                        });
+                    } catch (error) {
+                        console.error('Error updating status:', error);
+                    }
+                };
+                
+                const deleteSubmission = async (id) => {
+                    if (!confirm('Are you sure you want to delete this application?')) return;
+                    
+                    try {
+                        await fetch(`/api/submissions/${id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `Bearer ${token.value}` }
+                        });
+                        submissions.value = submissions.value.filter(s => s._id !== id);
+                    } catch (error) {
+                        console.error('Error deleting:', error);
+                    }
+                };
+                
+                const exportCSV = async () => {
+                    try {
+                        const response = await fetch('/api/export/csv', {
+                            headers: { 'Authorization': `Bearer ${token.value}` }
+                        });
+                        
+                        if (response.ok) {
+                            const blob = await response.blob();
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `happy-street-data-${new Date().toISOString().split('T')[0]}.csv`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                        }
+                    } catch (error) {
+                        alert('Error exporting data');
+                    }
+                };
+                
+                const viewDetails = (submission) => {
+                    viewingSubmission.value = submission;
+                };
+                
+                const formatDate = (dateString) => {
+                    return new Date(dateString).toLocaleDateString('en-IN');
+                };
+                
+                const formatTime = (dateString) => {
+                    return new Date(dateString).toLocaleTimeString('en-IN', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                };
+                
+                const formatDateTime = (dateString) => {
+                    return new Date(dateString).toLocaleString('en-IN');
+                };
+                
+                const getTypeClass = (type) => {
+                    const classes = {
+                        'visitor': 'bg-blue-100 text-blue-800',
+                        'volunteer': 'bg-green-100 text-green-800',
+                        'performer': 'bg-purple-100 text-purple-800',
+                        'stall': 'bg-yellow-100 text-yellow-800',
+                        'sponsor': 'bg-indigo-100 text-indigo-800',
+                        'other': 'bg-gray-100 text-gray-800'
+                    };
+                    return classes[type] || 'bg-gray-100 text-gray-800';
+                };
+                
+                const getStatusClass = (status) => {
+                    return `status-${status}`;
+                };
+                
+                // Check if already logged in
+                onMounted(() => {
+                    if (token.value) {
+                        isLoggedIn.value = true;
+                        fetchSubmissions();
+                    }
+                });
+                
+                // Auto-refresh every 30 seconds
+                setInterval(() => {
+                    if (isLoggedIn.value) {
+                        fetchSubmissions();
+                    }
+                }, 30000);
+                
+                return {
+                    isLoggedIn,
+                    loginData,
+                    loginError,
+                    submissions,
+                    viewingSubmission,
+                    searchQuery,
+                    stats,
+                    filteredSubmissions,
+                    handleLogin,
+                    handleLogout,
+                    refreshData,
+                    updateStatus,
+                    deleteSubmission,
+                    exportCSV,
+                    viewDetails,
+                    formatDate,
+                    formatTime,
+                    formatDateTime,
+                    getTypeClass,
+                    getStatusClass
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
